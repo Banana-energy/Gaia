@@ -1,17 +1,17 @@
 <template>
   <div id="app">
-    <FileManager />
+    <xterm />
   </div>
 </template>
 
 <script>
-// import xterm from './components/xterm'
-import FileManager from './components/FileManager'
+import xterm from './components/xterm'
+// import FileManager from './components/FileManager'
 
 export default {
   name: 'App',
   components: {
-    FileManager
+    xterm
   }
 }
 </script>
@@ -24,7 +24,6 @@ html, body {
 }
 
 #app {
-  display: block;
   height: 100%;
 }
 </style>

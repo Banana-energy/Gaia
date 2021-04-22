@@ -1,0 +1,19 @@
+@import './font/iconfont.css';
+// 修改浏览器滚动条样式
+::-webkit-scrollbar {
+  width: 10Px;
+  height: 10Px;
+  overflow: auto;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #e6e6e6;
+  min-height: 25Px;
+  min-width: 25Px;
+  border: 1px solid #e0e0e0;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f7f7f7;
+  border: 1px solid #efefef;
+}

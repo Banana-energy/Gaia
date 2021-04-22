@@ -45,17 +45,17 @@
 
 <script>
 import 'xterm/css/xterm.css'
-import {Terminal} from 'xterm'
-import {FitAddon} from 'xterm-addon-fit'
+import { Terminal } from 'xterm'
+import { FitAddon } from 'xterm-addon-fit'
 import * as io from 'socket.io-client'
 import * as echarts from 'echarts/core'
-import {LegendComponent, TitleComponent, TooltipComponent} from 'echarts/components'
-import {PieChart} from 'echarts/charts'
-import {SVGRenderer} from 'echarts/renderers'
-import {commonOptions} from '../constants/echarts'
+import { LegendComponent, TitleComponent, TooltipComponent } from 'echarts/components'
+import { PieChart } from 'echarts/charts'
+import { SVGRenderer } from 'echarts/renderers'
+import { commonOptions } from '../constants/echarts'
 import status from '../constants/status'
 import config from '../constants/config'
-import {deepAssign, deepClone} from '../utils'
+import { deepAssign, deepClone, debounce } from '../utils'
 
 export default {
   props: {
@@ -147,7 +147,7 @@ export default {
   mounted() {
     this.initSocket()
     echarts.use([TitleComponent, TooltipComponent, LegendComponent, PieChart, SVGRenderer])
-    window.addEventListener('resize', this.resizeScreen, false)
+    window.addEventListener('resize', this.debounce(this.resizeScreen, 500), false)
   },
   beforeDestroy() {
     this.destroySocket()
@@ -281,7 +281,8 @@ export default {
       this.term.dispose()
     },
     deepAssign,
-    deepClone
+    deepClone,
+    debounce
   }
 }
 </script>

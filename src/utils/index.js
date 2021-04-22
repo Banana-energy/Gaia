@@ -41,7 +41,7 @@ export function deepClone(obj) {
   for (const key in obj) {
     // 循环原始数据中的每一项，把每一项赋值给新的对象
     if (obj.hasOwnProperty(key)) {
-      cloneObj[key] = this.deepClone(obj[key])
+      cloneObj[key] = deepClone(obj[key])
     } else {
       break
     }
@@ -50,19 +50,31 @@ export function deepClone(obj) {
 }
 
 export function deepAssign(sObj, eObj) {
-  const obj = this.deepClone(sObj)
+  const cObj = this.deepClone(sObj)
   // 再拿OBJ2替换OBJ中的每一项
   for (const key in eObj) {
     if (eObj.hasOwnProperty(key)) {
       const v2 = eObj[key]
-      const v1 = obj[key]
+      const v1 = cObj[key]
       // 如果OBJ2遍历的当前项是个对象，并且对应的OBJ这项也是一个对象，此时不能直接替换，需要把两个对象重新合并一下，合并后的最新结果赋值给新对象中的这一项
       if (typeof v1 === 'object' && typeof v2 === 'object') {
-        obj[key] = this.deepAssign(v1, v2)
+        cObj[key] = this.deepAssign(v1, v2)
         continue
       }
-      obj[key] = v2
+      cObj[key] = v2
     }
   }
-  return obj
+  return cObj
+}
+
+export function debounce(func, second) {
+  let timer = null
+  return function() {
+    if (timer) {
+      clearTimeout(timer)
+    }
+    timer = setTimeout(() => {
+      func.apply(this, arguments)
+    }, second)
+  }
 }

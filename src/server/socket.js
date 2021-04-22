@@ -1,5 +1,6 @@
 const dayjs = require('dayjs')
 const config = require('./config')
+const ss = require('socket.io-stream')
 
 const SSH = require('ssh2').Client
 
@@ -35,11 +36,7 @@ module.exports = function(socket) {
           sftp.readdir(data.toString().trim(), sftpCallback)
           const path = []
           data.toString().trim().split('/').map((item) => {
-            if (item === '') {
-              path.push('/')
-            } else {
-              path.push(item)
-            }
+            path.push(item === '' ? '/' : item)
           })
           socket.emit('filePath', path)
         })
@@ -47,6 +44,84 @@ module.exports = function(socket) {
       socket.on('openFolder', (data) => {
         sftp.readdir(data.toString().trim(), sftpCallback)
       })
+      socket.on('download', (path, name) => {
+        const stream = ss.createStream()
+        const file = path + '/' + name
+        ss(socket).emit('download', stream, name)
+        sftp.createReadStream(file, {
+          autoClose: true
+        }).pipe(stream)
+      })
+      let hasReceived = 0
+      socket.on('upload', (buffer, filename, path, num, length) => {
+        let file, existed
+        exist(sftp, path + '/' + filename)
+          .then((info) => {
+            existed = !!(info.isDirectory || info.isSymbolicLink || info.isFile)
+            if (existed) {
+              if (num === 1) {
+                file = sftp.createWriteStream(path + '/' + filename, {
+                  flags: 'w+',
+                  autoClose: true
+                })
+              } else {
+                file = sftp.createWriteStream(path + '/' + filename, {
+                  flags: 'a+',
+                  autoClose: true
+                })
+              }
+            } else {
+              file = sftp.createWriteStream(path + '/' + filename, {
+                autoClose: true
+              })
+            }
+            hasReceived += +buffer.length
+            const stream = require('stream')
+            const readStream = new stream.PassThrough()
+            readStream.write(buffer)
+            readStream.pipe(file)
+            readStream.end()
+            if (hasReceived >= length) {
+              file.on('finish', () => {
+                socket.emit('uploaded')
+              })
+            } else {
+              file.end()
+              file.on('finish', () => {
+                socket.emit('uploading')
+              })
+            }
+          })
+      })
+        .on('rmdir', (path, isFolder) => {
+          if (isFolder) {
+            sftp.rmdir(path, (error) => {
+              if (error) {
+                SSHError('SFTP ERROR' + error)
+              }
+              socket.emit('uploaded')
+            })
+          } else {
+            ssh.exec(`rm ${path}`, (error, stream) => {
+              if (error) {
+                console.error(error)
+                SSHError('EXEC ERROR' + error)
+                ssh.end()
+                return
+              }
+              socket.emit('uploaded')
+            })
+          }
+        })
+        .on('chmod', (path, name, octal) => {
+          const filename = path + '/' + name
+          sftp.chmod(filename, octal, (error) => {
+            if (error) {
+              SSHError('SFTP ERROR' + error)
+            }
+            socket.emit('uploaded')
+          })
+        })
     })
     ssh.shell({
       term: config.term,
@@ -192,6 +267,55 @@ module.exports = function(socket) {
     return Math.round(size)
   }
 
+  function sizeTransferWithUnit(size) {
+    if (size >= 1024 * 1024 * 10) {
+      size = size / (1024 * 1024)
+      return Math.round(size) + ' MB'
+    } else if (size >= 1024 * 1024) {
+      size = size / (1024 * 1024)
+      return Math.round(size) + ' MB'
+    } else if (size > 1024) {
+      size = size / 1024
+      return Math.round(size) + ' kb'
+    } else {
+      return Math.round(size) + ' b'
+    }
+  }
+
+  function exist(sftp, path) {
+    let info = {}
+    return new Promise(resolve => {
+      sftp.stat(path, (error, stats) => {
+        if (error) {
+          if (error.code === 2 || error.code === 4) {
+            info.isFile = false
+            resolve(info)
+            console.log(`No such file: ${path}`, '_stat')
+          } else {
+            console.log(`${error.message} ${path}`, '_stat', error.code)
+          }
+        } else {
+          info = {
+            mode: stats.mode,
+            uid: stats.uid,
+            gid: stats.gid,
+            size: stats.size,
+            accessTime: stats.atime * 1000,
+            modifyTime: stats.mtime * 1000,
+            isDirectory: stats.isDirectory(),
+            isFile: stats.isFile(),
+            isBlockDevice: stats.isBlockDevice(),
+            isCharacterDevice: stats.isCharacterDevice(),
+            isSymbolicLink: stats.isSymbolicLink(),
+            isFIFO: stats.isFIFO(),
+            isSocket: stats.isSocket()
+          }
+          resolve(info)
+        }
+      })
+    })
+  }
+
   function sftpCallback(error, list) {
     if (error) {
       SSHError('SFTP ERROR' + error)
@@ -204,7 +328,7 @@ module.exports = function(socket) {
       const file = {
         folder,
         name: item.filename,
-        size: folder ? '' : item.attrs.size + ' b',
+        size: folder ? '' : sizeTransferWithUnit(item.attrs.size),
         time: dayjs.unix(item.attrs.mtime).format('YYYY/D/M HH:mm:ss'),
         authority: attr[0],
         owner: attr[2]
