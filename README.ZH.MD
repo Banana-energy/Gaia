@@ -2,6 +2,8 @@
 
 > 🏃🏻‍♂️Gaia [ˈɡeɪə]， 盖亚·奥特曼，大地守护者，属于地球的奥特曼。
 
+[README](https://github.com/Banana-energy/Gaia/blob/main/README.MD)
+
 [![Node version](https://img.shields.io/badge/node-%3E%3D12.0.0-green?style=flat-square)](https://www.npmjs.com/package/ssh2)
 [![Version](https://img.shields.io/badge/version-0.1.0-green?style=flat-square)](https://github.com/Banana-energy/Gaia)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](https://github.com/Banana-energy/Gaia/blob/main/LICENSE)
