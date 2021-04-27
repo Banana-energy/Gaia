@@ -224,11 +224,7 @@ export default {
   },
   computed: {
     color() {
-      let color = '#2db7f5'
-      if (this.percent === 100) {
-        color = '#5cb85c'
-      }
-      return color
+      return this.percent === 100 ? '#5cb85c' : '#2db7f5'
     }
   },
   watch: {
@@ -244,30 +240,31 @@ export default {
     }
   },
   mounted() {
-    this.resizeTable()
-    window.addEventListener('resize', this.resizeTable)
-    this.socket = io.connect(`${config.url}:${config.port}`, {
-      path: config.path,
-      query: {
-        host: '192.168.1.129',
-        port: 22,
-        username: 'root',
-        password: '123456'
-      }
-    })
-    this.socket.on('fileList', (fileList) => {
-      this.fileList = fileList
-      this.loading = false
-    })
-      .on('filePath', (data) => {
-        this.filePath = data
-      })
-    this.downloadFile()
+    this.initSocket()
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.resizeTable)
+    this.socket.close()
   },
   methods: {
+    initSocket() {
+      const query = window.opener.query
+      document.title = `${query.username}@${query.host}`
+      this.resizeTable()
+      window.addEventListener('resize', this.resizeTable)
+      this.socket = io.connect(`${config.url}:${config.port}`, {
+        path: config.path,
+        query
+      })
+      this.socket.on('fileList', (fileList) => {
+        this.fileList = fileList
+        this.loading = false
+      })
+        .on('filePath', (data) => {
+          this.filePath = data
+        })
+      this.downloadFile()
+    },
     openFolder(row) {
       if (row.folder) {
         this.loading = true

@@ -27,7 +27,7 @@
         @on-row-dblclick="connect"
       />
       <div slot="footer">
-        <Button type="primary" :disabled="disabled" :loading="conLoading" @click="connect">连接</Button>
+        <Button type="primary" :disabled="disabled" :loading="loading" @click="connect">连接</Button>
         <Button @click="close">取消</Button>
       </div>
     </Modal>
@@ -53,7 +53,7 @@ export default {
   },
   data() {
     return {
-      conLoading: false,
+      loading: false,
       disabled: true,
       propertyActive: false,
       isAdd: true,
@@ -90,13 +90,19 @@ export default {
       }
     },
     connect(row, index) {
-      console.log(row)
-      console.log(index)
+      if (index) {
+        // 双击
+      } else {
+        this.loading = true
+        setTimeout(async() => {
+          await this.$router.push({ name: 'xterm', params: { row: this.row }})
+          this.loading = false
+        }, 500)
+      }
     },
     select(row) {
       this.disabled = false
       this.row = row
-      console.log(row)
     },
     newConnect() {
       this.row = {
@@ -121,8 +127,9 @@ export default {
 
     },
     deleteConnect() {
-      this.$removeItem(`mxb-${this.row.name}`)
+      this.$removeItem(`mxb-${this.row.host}`)
       this.row = {}
+      this.disabled = true
     }
   }
 }

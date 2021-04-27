@@ -36,9 +36,13 @@ npm run start
 
 ### ⏰ Next
 
-- Add routers
+- ~~Add routers~~
+
+- Add create directories, files, links
 
 - Add support for public-key authentication
+
+- Preview of certain types of files
 
 - Breakpoint resume of large files
 

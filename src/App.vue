@@ -1,18 +1,12 @@
 <template>
   <div id="app">
-    <xterm />
+    <router-view />
   </div>
 </template>
 
 <script>
-import xterm from './components/xterm'
-// import FileManager from './components/FileManager'
-
 export default {
-  name: 'App',
-  components: {
-    xterm
-  }
+  name: 'App'
 }
 </script>
 

@@ -55,22 +55,9 @@ import { SVGRenderer } from 'echarts/renderers'
 import { commonOptions } from '../constants/echarts'
 import status from '../constants/status'
 import config from '../constants/config'
-import { deepAssign, deepClone, debounce } from '../utils'
+import { debounce, deepAssign, deepClone } from '../utils'
 
 export default {
-  props: {
-    query: {
-      type: Object,
-      default: () => {
-        return {
-          host: '192.168.1.129',
-          port: 22,
-          username: 'root',
-          password: '123456'
-        }
-      }
-    }
-  },
   data() {
     return {
       address: '',
@@ -123,6 +110,9 @@ export default {
   computed: {
     common() {
       return this.deepClone(commonOptions)
+    },
+    query() {
+      return this.$route.params.row
     }
   },
   watch: {
@@ -169,6 +159,7 @@ export default {
         path: config.path,
         query: this.query
       })
+
       this.initTerm()
       this.term.onData((data) => {
         this.socket.emit('data', data)
@@ -221,7 +212,11 @@ export default {
           this.status = 'WEBSOCKET SERVER DISCONNECTED: ' + error
           this.success = false
           this.socket.io.reconnection(false)
-          // TODO 跳登录页
+          this.$Message.error({
+            content: error,
+            background: true,
+            duration: 2
+          })
         })
     },
     resizeScreen() {
@@ -241,6 +236,9 @@ export default {
           break
         case 'load':
           this.visible = true
+          break
+        case 'folder':
+          this.toFile()
       }
     },
     drawEcharts() {
@@ -280,6 +278,10 @@ export default {
       this.socket.close()
       this.term.dispose()
     },
+    toFile() {
+      window.query = this.query
+      window.open('/file')
+    },
     deepAssign,
     deepClone,
     debounce
@@ -287,7 +289,25 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style>
+.spin-icon-loading {
+  animation: ani-spin 1s linear infinite;
+}
+@keyframes ani-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>
+
+<style scoped lang="scss">
+
 .terminal-container {
   height: 100%;
 }

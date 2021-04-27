@@ -152,7 +152,7 @@ export default {
         this.$refs['property'].validate((valid) => {
           if (valid) {
             if (!this.property.name) { this.property.name = this.property.host }
-            this.$setItem(`mxb-${this.property.name}`, JSON.stringify(this.property))
+            this.$setItem(`mxb-${this.property.host}`, JSON.stringify(this.property))
             this.$emit('update:property-active', false)
           } else {
             this.$Message.error('请输入主机名!')

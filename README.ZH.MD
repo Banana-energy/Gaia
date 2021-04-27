@@ -11,7 +11,7 @@
 
 ### 🍋 介绍
 
-一个网页版SSH端和SFTP文件管理，用到的库包括socket.io, xterm.js, echarts 和 express
+一个基于SSH2的网页版SSH端和SFTP文件管理，用到的库包括socket.io, xterm.js, echarts 和 express
 
 通过Echarts可视化机器CPU和内存负载情况
 
@@ -36,9 +36,13 @@ npm run start
 
 ### ⏰ 下一步
 
-- 添加路由
+- ~~添加路由~~
 
-- 添加支持公钥访问
+- 添加新建文件、目录、链接
+
+- 支持公钥访问
+
+- 支持某些类型文件预览效果
 
 - 大文件断点续传
 
