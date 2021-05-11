@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Modal v-model="listActive" :mask-closable="false" width="720">
+    <Modal v-model="listActive" :closable="false" :mask-closable="false" width="720">
       <p slot="header">
         <span>会话</span>
       </p>
@@ -45,23 +45,29 @@ export default {
     newConnect
   },
   mixins: [mixin],
-  props: {
-    listActive: {
-      type: Boolean,
-      default: true
-    }
-  },
   data() {
     return {
       loading: false,
       disabled: true,
       propertyActive: false,
+      listActive: true,
       isAdd: true,
       list: [],
-      row: {},
+      row: {
+        name: '',
+        host: '',
+        agreement: '1',
+        port: 22,
+        desc: '',
+        method: '1',
+        username: '',
+        password: '',
+        publicKey: ''
+      },
       header: [{
         title: '名称',
-        key: 'name'
+        key: 'name',
+        tooltip: true
       }, {
         title: '主机',
         key: 'host'
@@ -91,7 +97,11 @@ export default {
     },
     connect(row, index) {
       if (index) {
-        // 双击
+        this.loading = true
+        setTimeout(async() => {
+          await this.$router.push({ name: 'xterm', params: { row }})
+          this.loading = false
+        }, 500)
       } else {
         this.loading = true
         setTimeout(async() => {
@@ -124,7 +134,8 @@ export default {
       this.propertyActive = true
     },
     close() {
-
+      this.$refs.connectTable.clearCurrentRow()
+      this.disabled = true
     },
     deleteConnect() {
       this.$removeItem(`mxb-${this.row.host}`)

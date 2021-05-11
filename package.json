@@ -1,6 +1,6 @@
 {
   "name": "ssh",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "server": "node ./src/server/server.js",
@@ -33,7 +33,6 @@
     "sass-loader": "^7.1.0",
     "eslint-plugin-vue": "5.2.2",
     "express": "^4.17.1",
-    "utf8": "^3.0.0",
     "vue-loader": "^14.2.4",
     "vue-template-compiler": "^2.6.11"
   },

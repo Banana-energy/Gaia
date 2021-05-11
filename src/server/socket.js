@@ -321,7 +321,7 @@ module.exports = function(socket) {
       SSHError('SFTP ERROR' + error)
     }
     const fileList = []
-    list.map((item) => {
+    list.forEach((item) => {
       const attr = item.longname.split(' ').filter((item) => !!item)
       const reg = /^d/g
       const folder = reg.test(attr[0])

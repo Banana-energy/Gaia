@@ -227,7 +227,7 @@ export default {
       switch (name) {
         case 'logout':
           this.destroySocket()
-          // TODO 跳登录
+          this.$router.push({ path: '/' })
           break
         case 'reAuth':
           this.destroySocket()
